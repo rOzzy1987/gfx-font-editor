@@ -12,18 +12,20 @@ interface IBitmapMergeResult {
 
 export default class GfxFontExporter {
     export(font: IFont) {
+        this.ensureGlyphs(font);
+        const mergeResult = this.mergeBitmaps(font);
+        const fontName = this.sanitizeName(font.name);
+
         let cpp = `
 /////////
-// ${font.name ?? 'GfxFont'}
+// Font: ${font.name ?? 'GfxFont'} (${font.height}px)
+// Size: approx ${((mergeResult.bytes.length + mergeResult.glyphs.length * 9 + 7) / 1024).toFixed(1)} kB in flash
+// exported with Adafruit GFX font editor (https://github.com/rOzzy1987/gfx-font-editor)
 
 #pragma once
 #include <Adafruit_GFX.h>
 #include <Arduino.h>
 `;
-        this.ensureGlyphs(font);
-        const mergeResult = this.mergeBitmaps(font);
-        const fontName = this.sanitizeName(font.name);
-
         const gen = new CppGenerator();
         const bmpVar = {
             name: fontName + '_Bitmap',
@@ -72,7 +74,7 @@ export default class GfxFontExporter {
                         `// char '${String.fromCharCode(g.charCode)}' 0x${g.charCode.toString(16).toUpperCase()} (${g.charCode})`
                 )
                 .join('\n    ') +
-            '\n}';
+            `\n} // ${mergeResult.glyphs.length * 9} bytes`;
         cpp += gen.generateDeclaration(glyphVar).replace('{{value}}', glyphData);
 
         cpp += gen.generate([
@@ -156,17 +158,19 @@ export default class GfxFontExporter {
             };
 
             si = 0;
+            let foundMatch = false;
             for (ri = 0; ri + flatSrc.length - 1 < result.length; ri++) {
                 for (si = 0; si < flatSrc.length; si++) {
                     if (result[ri + si] != flatSrc[si]) si = 10000000;
                 }
                 if (si == flatSrc.length) {
                     // we found a match!
+                    foundMatch = true;
                     gcb.bytesOffset = ri;
                     ri = 10000000;
                 }
             }
-            if (ri + flatSrc.length - 1 == result.length) {
+            if (!foundMatch) {
                 // for cycle ended normally, no match found
 
                 gcb.bytesOffset = result.length;
