@@ -35,7 +35,7 @@ export default {
             this.cursor.x = Math.floor(this.font.height / 2);
             this.cursor.y = Math.floor(this.font.height * 1.5)
 
-            const img = new ImageData(w, h, { colorSpace: 'srgb' });// ctx.createImageData(w, h);
+            const img = new ImageData(w, h);
             for (let i = 0; i < this.text.length; i++) {
                 this.renderChar(img, this.text.charAt(i));
             }

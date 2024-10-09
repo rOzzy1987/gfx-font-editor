@@ -11,7 +11,7 @@
                         </div>
                     </div>
                     <div class="field">
-                        <label for="fontName" class="label">Font height</label>
+                        <label for="fontName" class="label">Line height</label>
                         <NumericEditor v-model="fontProp.height" :is-small="false" />
                     </div>
                 </div>

@@ -19,14 +19,22 @@
                     </button>
                 </div>
                 <div class="buttons" style="justify-content: center">
-                    <div
-                        class="file-drop-zone"
-                        :class="{ active: dragged }"
-                        @drop="drop"
-                        @dragenter="prevent"
-                        @dragleave="dragLeave"
-                        @dragover="dragOver"
-                    >
+                    <div class="field has-addons">
+                        <div class="control">
+                            <input type="text" class="input" placeholder="or open from URL" v-model="url">
+                        </div>
+                        <div class="control">
+                            <button class="button" @click="openUrl">
+                                <span class="icon">
+                                    <i class="fas fa-arrow-right"></i>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="buttons" style="justify-content: center">
+                    <div class="file-drop-zone" :class="{ active: dragged }" @drop="drop" @dragenter="prevent"
+                        @dragleave="dragLeave" @dragover="dragOver">
                         <p>... or drop file here</p>
                     </div>
                 </div>
@@ -46,7 +54,8 @@ export default {
         return {
             dragged: false,
             uploads: 0,
-            src: ''
+            src: '',
+            url: ''
         };
     },
     methods: {
@@ -127,6 +136,10 @@ export default {
         newFont() {
             const font = new Font();
             this.fontProp = font;
+        },
+        async openUrl() {
+            this.src = await (await fetch(this.url)).text();
+            this.parseFont();
         }
     },
     props: {
