@@ -41,7 +41,7 @@ export default class GfxFontExporter {
         };
 
         let bmpData = '{\n';
-        const bmpArr = mergeResult.bytes.filter((_) => true);
+        const bmpArr = mergeResult.bytes.slice();
         for (let i = 0; i < mergeResult.bytes.length; i += 16) {
             const bmpRow = bmpArr.splice(0, 16);
             bmpData += `    ${bmpRow.map((v) => gen.generateVal(v, true)).join(', ')},\n`;
