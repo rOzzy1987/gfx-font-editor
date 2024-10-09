@@ -10,11 +10,20 @@
                             <input type="text" class="input" v-model="fontProp.name" />
                         </div>
                     </div>
-                </div>
-                <div class="column">
                     <div class="field">
                         <label for="fontName" class="label">Font height</label>
                         <NumericEditor v-model="fontProp.height" :is-small="false" />
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="control">
+                        <div class="field">
+                            <label class="label">Test text</label>
+                            <textarea rows="3" class="textarea" v-model="sampleText"></textarea>
+                        </div>
+                        <div class="field">
+                            <FontRenderer :font="fontProp" :text="sampleText" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -53,8 +62,14 @@
 <script lang="ts">
 import { Font } from '@/bll/FontModel';
 import NumericEditor from '@/components/NumericEditor.vue';
+import FontRenderer from '@/components/FontRenderer.vue';
 
 export default {
+    data() {
+        return {
+            sampleText: "The quick brown fox\njumps over the lazy dog"
+        }
+    },
     props: {
         font: { type: Font, required: true }
     },
@@ -69,6 +84,6 @@ export default {
         }
     },
     emits: ['update:font', 'add', 'export', 'reset'],
-    components: { NumericEditor }
+    components: { NumericEditor, FontRenderer }
 };
 </script>

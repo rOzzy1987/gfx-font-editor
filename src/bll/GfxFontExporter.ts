@@ -46,8 +46,9 @@ export default class GfxFontExporter {
             const bmpRow = bmpArr.splice(0, 16);
             bmpData += `    ${bmpRow.map((v) => gen.generateVal(v, true)).join(', ')},\n`;
         }
-        bmpData += `} // ${mergeResult.bytes.length} bytes`;
+        bmpData += '}';
         cpp += gen.generateDeclaration(bmpVar).replace('{{value}}', bmpData);
+        cpp += ` // ${mergeResult.bytes.length} bytes`;
 
         const glyphVar = {
             name: fontName + '_Glyphs',
@@ -74,8 +75,9 @@ export default class GfxFontExporter {
                         `// char '${String.fromCharCode(g.charCode)}' 0x${g.charCode.toString(16).toUpperCase()} (${g.charCode})`
                 )
                 .join('\n    ') +
-            `\n} // ${mergeResult.glyphs.length * 9} bytes`;
+            '\n}';
         cpp += gen.generateDeclaration(glyphVar).replace('{{value}}', glyphData);
+        cpp += ` // ${mergeResult.glyphs.length * 9} bytes`;
 
         cpp += gen.generate([
             {
