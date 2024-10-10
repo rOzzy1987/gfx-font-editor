@@ -11,6 +11,12 @@
                         </span>
                         <span>Open file</span>
                     </label>
+                    <button class="button is-warning" @click="toggleModal">
+                        <span class="icon">
+                            <i class="fas fa-clipboard"></i>
+                        </span>
+                        <span>Paste text</span>
+                    </button>
                     <button class="button is-info" @click="newFont">
                         <span class="icon">
                             <i class="fas fa-file-alt"></i>
@@ -18,17 +24,29 @@
                         <span>New from scratch</span>
                     </button>
                 </div>
-                <div class="buttons" style="justify-content: center">
-                    <div class="field has-addons">
-                        <div class="control">
-                            <input type="text" class="input" placeholder="or open from URL" v-model="url">
-                        </div>
-                        <div class="control">
-                            <button class="button" @click="openUrl">
-                                <span class="icon">
-                                    <i class="fas fa-arrow-right"></i>
-                                </span>
-                            </button>
+                <div class="modal" :class="{ 'is-active': modal }">
+                    <div class="modal-background">
+                    </div>
+                    <div class="modal-content" style="width: 100%">
+                        <div class="container">
+                            <div class="message is-link">
+                                <div class="message-header">Paste text here
+                                    <button class="delete" @click="toggleModal"></button>
+                                </div>
+                                <div class="message-body">
+                                    <textarea style="width: 100%;" rows="30" v-model="pasted"></textarea>
+                                    <div class="field">
+                                        <div class="control has-text-right">
+                                            <button class="button is-success" @click="loadPasted">
+                                                <span class="icon">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                                <span>Done</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -55,7 +73,8 @@ export default {
             dragged: false,
             uploads: 0,
             src: '',
-            url: ''
+            pasted: '',
+            modal: false
         };
     },
     methods: {
@@ -137,9 +156,13 @@ export default {
             const font = new Font();
             this.fontProp = font;
         },
-        async openUrl() {
-            this.src = await (await fetch(this.url)).text();
+        toggleModal() {
+            this.modal = !this.modal;
+        },
+        loadPasted() {
+            this.src = this.pasted;
             this.parseFont();
+            this.modal = this.font == undefined;
         }
     },
     props: {
