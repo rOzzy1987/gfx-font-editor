@@ -13,14 +13,8 @@
                     <div class="pixel-editor" :style="pixelEditorStyle">
                         <div class="pixels" :style="pixelsStyle">
                             <div v-for="(r, rk) in modelValueField.bitmap" v-bind:key="r" class="pixel-row">
-                                <div
-                                    v-for="(c, ck) of r"
-                                    v-bind:key="c"
-                                    class="pixel"
-                                    :class="{ active: c > 0 }"
-                                    @mousedown="mouseDn(ck, rk)"
-                                    @mousemove="mouseMv(ck, rk)"
-                                ></div>
+                                <div v-for="(c, ck) of r" v-bind:key="c" class="pixel" :class="{ active: c > 0 }"
+                                    @mousedown="mouseDn(ck, rk)" @mousemove="mouseMv(ck, rk)"></div>
                             </div>
                         </div>
                         <div class="line-marker" :style="lineStyle"></div>
@@ -28,69 +22,96 @@
                     </div>
                 </div>
                 <div class="column">
-                    <div
-                        style="
+                    <div class="block">
+                        <div style="
                             display: flex;
                             flex-direction: column;
                             justify-content: end;
                             align-items: end;
                             flex-grow: 0;
-                        "
-                    >
-                        <NumericEditor
-                            v-model="modelValueField.cols"
-                            :color="1"
-                            :text="'wdth'"
-                            title="Bitmap width"
-                            class="fe"
-                        />
-                        <NumericEditor
-                            v-model="modelValueField.rows"
-                            :color="1"
-                            :text="'hght'"
-                            title="Bitmap height"
-                            class="fe"
-                        />
-                        <NumericEditor
-                            v-model="modelValueField.base"
-                            :color="2"
-                            :text="'base'"
-                            title="Baseline offset"
-                            :min="-250"
-                            class="fe"
-                        />
-                        <NumericEditor
-                            v-model="modelValueField.xOffset"
-                            :color="3"
-                            :text="'offs'"
-                            title="X offset"
-                            class="fe"
-                        />
-                        <NumericEditor
-                            v-model="modelValueField.xAdvance"
-                            :color="4"
-                            :text="'xAdv'"
-                            title="X advance"
-                            class="fe"
-                        />
-                    </div>
-                    <p>&nbsp;</p>
-                    <div class="field buttons fe">
-                        <div class="control">
-                            <button class="button is-success is-small" @click="$emit('clone', modelValue)">
-                                <span class="icon">
-                                    <i class="fas fa-clone"></i>
-                                </span>
-                                <span>Clone</span>
-                            </button>
+                        ">
+                            <NumericEditor v-model="modelValueField.cols" :color="1" :text="'wdth'" title="Bitmap width"
+                                class="fe" />
+                            <NumericEditor v-model="modelValueField.rows" :color="1" :text="'hght'"
+                                title="Bitmap height" class="fe" />
+                            <NumericEditor v-model="modelValueField.base" :color="2" :text="'base'"
+                                title="Baseline offset" :min="-250" class="fe" />
+                            <NumericEditor v-model="modelValueField.xOffset" :color="3" :text="'offs'" title="X offset"
+                                class="fe" />
+                            <NumericEditor v-model="modelValueField.xAdvance" :color="4" :text="'xAdv'"
+                                title="X advance" class="fe" />
                         </div>
-                        <div class="control">
-                            <button class="button is-danger is-small" @click="$emit('delete', modelValue)">
-                                <span class="icon">
-                                    <i class="fas fa-trash-alt"></i>
-                                </span>
-                                <span>Delete</span>
-                            </button>
+                    </div>
+                    <div class="block" style="display: flex; flex-direction:column; gap: 1rem; align-items: end;">
+                        <div class="fe" style="display: flex; gap: 1rem;">
+                            <div class="field has-addons fe">
+                                <p class="control">
+                                    <button class="button is-light is-link is-small" @click="moveL">
+                                        <span class="icon">
+                                            <i class="fas fa-left-long"></i>
+                                        </span>
+                                    </button>
+                                </p>
+                                <p class="control">
+                                    <button class="button is-light is-link is-small" @click="moveR">
+                                        <span class="icon">
+                                            <i class="fas fa-right-long"></i>
+                                        </span>
+                                    </button>
+                                </p>
+                            </div>
+                            <div class="field has-addons fe">
+                                <p class="control">
+                                    <button class="button is-light is-link is-small" @click="moveU">
+                                        <span class="icon">
+                                            <i class="fas fa-up-long"></i>
+                                        </span>
+                                    </button>
+                                </p>
+                                <p class="control">
+                                    <button class="button is-light is-link is-small" @click="moveD">
+                                        <span class="icon">
+                                            <i class="fas fa-down-long"></i>
+                                        </span>
+                                    </button>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="field has-addons">
+                            <p class="control">
+                                <button class="button is-light is-danger is-small" @click="flipV">
+                                    <span class="icon">
+                                        <i class="fas fa-arrows-up-down"></i>
+                                    </span>
+                                </button>
+                            </p>
+                            <p class="control">
+                                <button class="button is-light is-danger is-small" @click="flipH">
+                                    <span class="icon">
+                                        <i class="fas fa-arrows-left-right"></i>
+                                    </span>
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="block">
+                        <div class="field buttons fe">
+                            <div class="control">
+                                <button class="button is-success is-small" @click="$emit('clone', modelValue)">
+                                    <span class="icon">
+                                        <i class="fas fa-clone"></i>
+                                    </span>
+                                    <span>Clone</span>
+                                </button>
+                            </div>
+                            <div class="control">
+                                <button class="button is-danger is-small" @click="$emit('delete', modelValue)">
+                                    <span class="icon">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </span>
+                                    <span>Delete</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -130,6 +151,50 @@ export default {
         paint(x: number, y: number) {
             if (this.modelValueField?.bitmap == undefined) return;
             this.modelValueField.bitmap[y][x] = this.pen;
+        },
+        moveL() {
+            this.transformCols(r => {
+                const p = r.splice(0, 1);
+                return r.concat(p);
+            });
+        },
+        moveR() {
+            this.transformCols(r => {
+                const p = r.splice(0, r.length - 1);
+                return r.concat(p);
+            });
+        },
+        moveU() {
+            this.transformRows(c => {
+                const p = c.splice(0, 1);
+                return c.concat(p);
+            })
+        },
+        moveD() {
+            this.transformRows(c => {
+                const p = c.splice(0, c.length - 1);
+                return c.concat(p);
+            })
+        },
+        flipH() {
+            this.transformCols(r => {
+                return r.slice().reverse();
+            });
+        },
+        flipV() {
+            this.transformRows(r => {
+                return r.slice().reverse();
+            });
+        },
+        transformCols(fn: (r: number[]) => number[]) {
+            if (this.modelValueField.bitmap.length == 0 || this.modelValueField.bitmap[0].length == 0) return;
+            for (let i in this.modelValueField.bitmap) {
+                this.modelValueField.bitmap[i] = fn(this.modelValueField.bitmap[i]);
+            }
+        },
+        transformRows(fn: (c: number[][]) => number[][]) {
+            if (this.modelValueField.bitmap.length == 0 || this.modelValueField.bitmap[0].length == 0) return;
+            this.modelValueField.bitmap = fn(this.modelValueField.bitmap);
         }
     },
     computed: {

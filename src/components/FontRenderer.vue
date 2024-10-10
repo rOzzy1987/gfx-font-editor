@@ -1,6 +1,13 @@
 <template>
     <div>
         <canvas width="320" ref="cnv"></canvas>
+        &nbsp;&nbsp;
+        <button class="button is-info is-small" @click="render">
+            <span class="icon">
+                <i class="fas fa-rotate"></i>
+            </span>
+            <span>Refresh</span>
+        </button>
     </div>
 </template>
 
@@ -54,7 +61,7 @@ export default {
 
             for (let y = 0; y < g.rows; y++) {
                 for (let x = 0; x < g.cols; x++) {
-                    if (g.bitmap[y][x] == 0) continue;
+                    if (!g.bitmap[y][x]) continue;
 
                     const rx = this.cursor.x + x + g.xOffset;
                     const ry = this.cursor.y + y + g.base;
@@ -69,7 +76,7 @@ export default {
                 }
             }
             this.cursor.x += g.xAdvance;
-        }
+        },
     },
     watch: {
         text() { this.render(); },

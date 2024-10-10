@@ -19,7 +19,7 @@
                     <div class="control">
                         <div class="field">
                             <label class="label">Test text</label>
-                            <textarea rows="3" class="textarea" v-model="sampleText"></textarea>
+                            <textarea rows="2" class="textarea" v-model="sampleText"></textarea>
                         </div>
                         <div class="field">
                             <FontRenderer :font="fontProp" :text="sampleText" />
