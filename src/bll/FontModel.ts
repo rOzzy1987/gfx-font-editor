@@ -17,6 +17,12 @@ export interface IFont {
     height: number;
 }
 
+export interface ISavedFont {
+    name: string;
+    date: number;
+    font: IFont;
+}
+
 export class Glyph {
     bitmap: number[][] = [];
     char: string = ' ';

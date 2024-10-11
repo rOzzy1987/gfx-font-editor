@@ -1,31 +1,41 @@
 <template>
     <LoadScreen v-model:font="font" v-if="font == undefined" />
     <div class="block" v-if="font !== undefined">
-        <FontEditor v-model:font="font" @add="addGlyph" @export="exportFont" @reset="resetFont" />
+        <FontEditor v-model:font="font" @add="addGlyph" @export="exportFont" @reset="resetFont" @save="saveToStorage" />
     </div>
     <div class="block glyphs" v-if="font !== undefined">
-        <GlyphEditor
-            v-for="g in font.glyphs"
-            v-bind:key="`g${g.char}`"
-            :model-value="g"
-            :font-height="font.height"
-            @clone="addGlyph"
-            @delete="deleteGlyph"
-        />
+        <GlyphEditor v-for="g in font.glyphs" v-bind:key="`g${g.char}`" :model-value="g" :font-height="font.height"
+            @clone="addGlyph" @delete="deleteGlyph" />
     </div>
+    <NotificationProvider v-model:shown="msgShown" :msg="msg" :is-error="msgIsError" />
+    <footer class="footer">
+        <p class="has-text-centered">
+            <b>Adafruit GFX font editor</b> by <a href="https://github.com/rOzzy1987" target="_blank">@rOzzy1987</a>
+            <br>2024
+        </p>
+        <p class="has-text-centered">
+            Source code available at <a href="https://github.com/rOzzy1987/gfx-font-editor" target="_blank">GitHub</a>
+        </p>
+        <SupportMe />
+    </footer>
 </template>
 
 <script lang="ts">
-import { Font, Glyph } from './bll/FontModel';
+import { Font, Glyph, type ISavedFont } from './bll/FontModel';
 import GlyphEditor from './components/GlyphEditor.vue';
 import FontEditor from './components/FontEditor.vue';
 import LoadScreen from './components/LoadScreen.vue';
 import GfxFontExporter from './bll/GfxFontExporter';
+import NotificationProvider from './components/NotificationProvider.vue';
+import SupportMe from './components/SupportMe.vue';
 
 export default {
     data() {
         return {
-            font: undefined as Font | undefined
+            font: undefined as Font | undefined,
+            msg: '',
+            msgIsError: false,
+            msgShown: false,
         };
     },
     methods: {
@@ -43,7 +53,7 @@ export default {
             result.char = this.getNewChar(result.char);
             if (result.char.length == 1) {
                 result.charCode = result.char.charCodeAt(0);
-                this.font?.glyphs.push(result);
+                this.font!.glyphs = [result].concat(this.font!.glyphs);
             }
         },
         getNewChar(val: string = '') {
@@ -78,12 +88,31 @@ export default {
             element.click();
 
             document.body.removeChild(element);
+
+            this.msg = 'Download finished: ' + filename;
+            this.msgIsError = false;
+            this.msgShown = true;
         },
         resetFont() {
             if (confirm('Are you sure you want to reset? All unsaved data will be lost!')) this.font = undefined;
+        },
+        saveToStorage() {
+            let strFonts = localStorage.getItem("fonts");
+            const fonts = strFonts == null ? [] : JSON.parse(strFonts) as ISavedFont[];
+            const font = {
+                name: this.font?.name ?? "Font",
+                date: new Date().valueOf(),
+                font: this.font!
+            }
+            fonts.push(font)
+            localStorage.setItem("fonts", JSON.stringify(fonts));
+
+            this.msg = 'Font saved: ' + font.name;
+            this.msgIsError = false;
+            this.msgShown = true;
         }
     },
-    components: { GlyphEditor, FontEditor, LoadScreen }
+    components: { GlyphEditor, FontEditor, LoadScreen, NotificationProvider, SupportMe }
 };
 </script>
 <style>

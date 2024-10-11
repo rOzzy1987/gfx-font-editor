@@ -11,11 +11,17 @@
                         </span>
                         <span>Open file</span>
                     </label>
-                    <button class="button is-warning" @click="toggleModal">
+                    <button class="button is-warning" @click="togglePasteModal">
                         <span class="icon">
                             <i class="fas fa-clipboard"></i>
                         </span>
                         <span>Paste text</span>
+                    </button>
+                    <button class="button is-warning" @click="toggleLoadModal">
+                        <span class="icon">
+                            <i class="fas fa-folder-open"></i>
+                        </span>
+                        <span>Load saved</span>
                     </button>
                     <button class="button is-info" @click="newFont">
                         <span class="icon">
@@ -24,14 +30,14 @@
                         <span>New from scratch</span>
                     </button>
                 </div>
-                <div class="modal" :class="{ 'is-active': modal }">
+                <div class="modal" :class="{ 'is-active': pasteModal }">
                     <div class="modal-background">
                     </div>
                     <div class="modal-content" style="width: 100%">
                         <div class="container">
                             <div class="message is-link">
                                 <div class="message-header">Paste text here
-                                    <button class="delete" @click="toggleModal"></button>
+                                    <button class="delete" @click="togglePasteModal"></button>
                                 </div>
                                 <div class="message-body">
                                     <textarea style="width: 100%;" rows="30" v-model="pasted"></textarea>
@@ -50,6 +56,56 @@
                         </div>
                     </div>
                 </div>
+                <div class="modal" :class="{ 'is-active': loadModal }">
+                    <div class="modal-background">
+                    </div>
+                    <div class="modal-content" style="width: 100%">
+                        <div class="container">
+                            <div class="message is-link">
+                                <div class="message-header">Select font to load
+                                    <button class="delete" @click="toggleLoadModal"></button>
+                                </div>
+                                <div class="message-body">
+                                    <div class="table-container">
+                                        <table class="table is-striped is-fullwidth is-hoverable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Font name</th>
+                                                    <th>Date</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="f of saved" v-bind:key="f.name + f.date">
+                                                    <td>{{ f.name }}</td>
+                                                    <td>{{ new Date(f.date).toLocaleString() }}</td>
+                                                    <td class="buttons is-justify-content-end">
+                                                        <button class="button is-small is-success" @click="loadFont(f)">
+                                                            <span class="icon">
+                                                                <i class="fas fa-folder-open"></i>
+                                                            </span>
+                                                        </button>
+                                                        <button class="button is-small is-danger"
+                                                            @click="deleteFont(f)">
+                                                            <span class="icon">
+                                                                <i class="fas fa-trash"></i>
+                                                            </span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <tr v-if="saved.length == 0">
+                                                    <td colspan="3" style="text-align: center;">
+                                                        <em>No fonts found</em>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="buttons" style="justify-content: center">
                     <div class="file-drop-zone" :class="{ active: dragged }" @drop="drop" @dragenter="prevent"
                         @dragleave="dragLeave" @dragover="dragOver">
@@ -60,12 +116,14 @@
                 <input type="file" id="file-upload" multiple hidden @change="fileSelected" />
             </div>
         </div>
+        <NotificationProvider v-model:shown="msgShown" :msg="msg" :is-error="msgIsError" />
     </div>
 </template>
 
 <script lang="ts">
 import { FontLoader } from '@/bll/FontLoader';
-import { Font } from '@/bll/FontModel';
+import { Font, type ISavedFont } from '@/bll/FontModel';
+import NotificationProvider from '@/components/NotificationProvider.vue';
 
 export default {
     data() {
@@ -74,7 +132,12 @@ export default {
             uploads: 0,
             src: '',
             pasted: '',
-            modal: false
+            pasteModal: false,
+            loadModal: false,
+            saved: [] as ISavedFont[],
+            msg: '',
+            msgShown: false,
+            msgIsError: false
         };
     },
     methods: {
@@ -119,7 +182,7 @@ export default {
 
             this.loadFiles(files);
         },
-        fileSelected(ev: InputEvent) {
+        fileSelected(ev: Event) {
             const filesArr = [];
             const files = (ev.target as HTMLInputElement)?.files;
             for (let i = 0; i < (files?.length ?? 0); i++) {
@@ -135,8 +198,12 @@ export default {
                 if (
                     (!file.name.endsWith('.h') && !file.name.endsWith('.cpp') && !file.name.endsWith('.c')) ||
                     file.type != 'text/plain'
-                )
+                ) {
+                    this.msgIsError = false;
+                    this.msg = `File '${file.name}' doesn't seem to be a font file, loading skipped.`;
+                    this.msgShown = true;
                     continue;
+                }
 
                 const t = this;
                 this.uploads++;
@@ -150,19 +217,44 @@ export default {
         },
         parseFont() {
             var parser = new FontLoader();
-            this.fontProp = parser.loadCpp(this.src);
+            try {
+                this.fontProp = parser.loadCpp(this.src);
+                if (this.fontProp == undefined)
+                    throw "Font loading failed!";
+            } catch (error) {
+                this.msgIsError = true;
+                this.msg = '' + error;
+                this.msgShown = true;
+            }
+
         },
         newFont() {
             const font = new Font();
             this.fontProp = font;
         },
-        toggleModal() {
-            this.modal = !this.modal;
+        togglePasteModal() {
+            this.pasteModal = !this.pasteModal;
         },
         loadPasted() {
             this.src = this.pasted;
             this.parseFont();
-            this.modal = this.font == undefined;
+            this.pasteModal = this.font == undefined;
+        },
+        toggleLoadModal() {
+            if (!this.loadModal) {
+                this.saved = (JSON.parse(localStorage.getItem("fonts") ?? "[]") as ISavedFont[]).sort((a, b) => b.date - a.date);
+            }
+            this.loadModal = !this.loadModal;
+        },
+        loadFont(font: ISavedFont) {
+            this.loadModal = false;
+            this.fontProp = font.font;
+        },
+        deleteFont(font: ISavedFont) {
+            if (!confirm("Are you sure you want to delete this font? This cannot be undone!")) return;
+            const i = this.saved.indexOf(font);
+            this.saved.splice(i, 1);
+            localStorage.setItem("fonts", JSON.stringify(this.saved));
         }
     },
     props: {
@@ -177,7 +269,8 @@ export default {
                 this.$emit('update:font', v);
             }
         }
-    }
+    },
+    components: { NotificationProvider }
 };
 </script>
 

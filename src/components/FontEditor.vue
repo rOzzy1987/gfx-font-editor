@@ -31,6 +31,12 @@
                 <div class="columns">
                     <div class="column">
                         <div class="buttons">
+                            <button class="button is-success" @click="$emit('save')">
+                                <span class="icon">
+                                    <i class="fas fa-save"></i>
+                                </span>
+                                <span>Save</span>
+                            </button>
                             <button class="button is-info" @click="$emit('export')">
                                 <span class="icon">
                                     <i class="fas fa-download"></i>
@@ -83,7 +89,7 @@ export default {
             }
         }
     },
-    emits: ['update:font', 'add', 'export', 'reset'],
+    emits: ['update:font', 'add', 'export', 'reset', 'save'],
     components: { NumericEditor, FontRenderer }
 };
 </script>

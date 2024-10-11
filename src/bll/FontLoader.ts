@@ -10,8 +10,7 @@ export class FontLoader {
         if (vars.filter((s) => s.rawType == 'GFXfont').length > 0) {
             return this.loadGfx(vars);
         }
-        alert('Parsing failed! Are you sure it is an Adafruit GFX font?');
-        throw 'Font parsing failed';
+        throw 'Parsing failed! Are you sure it is an Adafruit GFX font?';
     }
 
     private loadGfx(vars: ICppVariableDefinition[]): IFont {
@@ -42,7 +41,7 @@ export class FontLoader {
             name: fontDef.name,
             firstChar: Number(fontDef.value[2]),
             lastChar: Number(fontDef.value[3]),
-            glyphs: glyphs,
+            glyphs: glyphs.filter((g) => (g.cols > 0 && g.rows > 0) || g.xAdvance > 0),
             height: Number(fontDef.value[4])
         };
     }

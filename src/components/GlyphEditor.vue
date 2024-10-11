@@ -12,8 +12,8 @@
                 <div class="column">
                     <div class="pixel-editor" :style="pixelEditorStyle">
                         <div class="pixels" :style="pixelsStyle">
-                            <div v-for="(r, rk) in modelValueField.bitmap" v-bind:key="r" class="pixel-row">
-                                <div v-for="(c, ck) of r" v-bind:key="c" class="pixel" :class="{ active: c > 0 }"
+                            <div v-for="(r, rk) in modelValueField.bitmap" v-bind:key="rk" class="pixel-row">
+                                <div v-for="(c, ck) of r" v-bind:key="ck" class="pixel" :class="{ active: c > 0 }"
                                     @mousedown="mouseDn(ck, rk)" @mousemove="mouseMv(ck, rk)"></div>
                             </div>
                         </div>
@@ -305,7 +305,7 @@ export default {
 
 .glyph-editor {
     margin: 16px;
-    flex-grow: 1;
+    min-width: 480px;
 }
 
 .pixel-editor {
