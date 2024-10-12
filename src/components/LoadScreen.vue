@@ -116,14 +116,13 @@
                 <input type="file" id="file-upload" multiple hidden @change="fileSelected" />
             </div>
         </div>
-        <NotificationProvider v-model:shown="msgShown" :msg="msg" :is-error="msgIsError" />
     </div>
 </template>
 
 <script lang="ts">
 import { FontLoader } from '@/bll/FontLoader';
 import { Font, type ISavedFont } from '@/bll/FontModel';
-import NotificationProvider from '@/components/NotificationProvider.vue';
+import { NotificationBus } from '@/bll/NorificationBus';
 
 export default {
     data() {
@@ -135,9 +134,6 @@ export default {
             pasteModal: false,
             loadModal: false,
             saved: [] as ISavedFont[],
-            msg: '',
-            msgShown: false,
-            msgIsError: false
         };
     },
     methods: {
@@ -199,9 +195,7 @@ export default {
                     (!file.name.endsWith('.h') && !file.name.endsWith('.cpp') && !file.name.endsWith('.c')) ||
                     file.type != 'text/plain'
                 ) {
-                    this.msgIsError = false;
-                    this.msg = `File '${file.name}' doesn't seem to be a font file, loading skipped.`;
-                    this.msgShown = true;
+                    NotificationBus.add({ message: `File '${file.name}' doesn't seem to be a font file, loading skipped.`, type: 'warn' });
                     continue;
                 }
 
@@ -222,9 +216,7 @@ export default {
                 if (this.fontProp == undefined)
                     throw "Font loading failed!";
             } catch (error) {
-                this.msgIsError = true;
-                this.msg = '' + error;
-                this.msgShown = true;
+                NotificationBus.add({ message: '' + error, type: 'err' });
             }
 
         },
@@ -269,8 +261,7 @@ export default {
                 this.$emit('update:font', v);
             }
         }
-    },
-    components: { NotificationProvider }
+    }
 };
 </script>
 

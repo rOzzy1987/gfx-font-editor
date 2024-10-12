@@ -1,0 +1,17 @@
+name: Block PRs from gh-pages
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+jobs:
+  check-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branches
+        run: |
+          if [ ${{ github.head_ref }} == "gh-pages" ] then
+            echo "Merge requests from 'gh-pages' branch are not allowed."
+            exit 1
+          fi
