@@ -7,7 +7,7 @@
         <GlyphEditor v-for="g in font.glyphs" v-bind:key="`g${g.char}`" :model-value="g" :font-height="font.height"
             @clone="addGlyph" @delete="deleteGlyph" />
     </div>
-    <NotificationProvider v-model:shown="msgShown" :msg="msg" :is-error="msgIsError" />
+    <NotificationDisplay />
     <footer class="footer">
         <p class="has-text-centered">
             <b>Adafruit GFX font editor</b> by <a href="https://github.com/rOzzy1987" target="_blank">@rOzzy1987</a>
@@ -22,20 +22,18 @@
 
 <script lang="ts">
 import { Font, Glyph, type ISavedFont } from './bll/FontModel';
+import { NotificationBus } from './bll/NorificationBus';
 import GlyphEditor from './components/GlyphEditor.vue';
 import FontEditor from './components/FontEditor.vue';
 import LoadScreen from './components/LoadScreen.vue';
 import GfxFontExporter from './bll/GfxFontExporter';
-import NotificationProvider from './components/NotificationProvider.vue';
 import SupportMe from './components/SupportMe.vue';
+import NotificationDisplay from './components/NotificationDisplay.vue';
 
 export default {
     data() {
         return {
             font: undefined as Font | undefined,
-            msg: '',
-            msgIsError: false,
-            msgShown: false,
         };
     },
     methods: {
@@ -89,9 +87,7 @@ export default {
 
             document.body.removeChild(element);
 
-            this.msg = 'Download finished: ' + filename;
-            this.msgIsError = false;
-            this.msgShown = true;
+            NotificationBus.add({ message: 'Download finished: ' + filename, type: 'info' });
         },
         resetFont() {
             if (confirm('Are you sure you want to reset? All unsaved data will be lost!')) this.font = undefined;
@@ -107,12 +103,10 @@ export default {
             fonts.push(font)
             localStorage.setItem("fonts", JSON.stringify(fonts));
 
-            this.msg = 'Font saved: ' + font.name;
-            this.msgIsError = false;
-            this.msgShown = true;
+            NotificationBus.add({ message: 'Font saved: ' + font.name, type: 'info' });
         }
     },
-    components: { GlyphEditor, FontEditor, LoadScreen, NotificationProvider, SupportMe }
+    components: { GlyphEditor, FontEditor, LoadScreen, NotificationDisplay, SupportMe }
 };
 </script>
 <style>
