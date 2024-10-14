@@ -2,31 +2,27 @@
 
 import fs from 'fs';
 import { spawn } from 'child_process';
-import process from 'process';
 
-var argv = process.argv.slice(2);
-var argc = argv.length;
-
-// var log = fs.createWriteStream('vbump.log');
-// var err = log;
-// var clog = console.log;
-// var cerr = console.error;
-// console.log = function (x, ...others) {
-//     clog(x);
-//     log.write(`${new Date().toISOString()} LOG: ${x}`);
-//     for (var o of others) {
-//         log.write(`     ${o}`);
-//     }
-//     log.write('\n');
-// };
-// console.error = function (x, ...others) {
-//     cerr(x, others);
-//     err.write(`${new Date().toISOString()} ERR: ${x}`);
-//     for (var o of others) {
-//         err.write(`     ${o}`);
-//     }
-//     err.write('\n');
-// };
+var log = fs.createWriteStream('vbump.log');
+var err = log;
+var clog = console.log;
+var cerr = console.error;
+console.log = function (x, ...others) {
+    clog(x);
+    log.write(`${new Date().toISOString()} LOG: ${x}`);
+    for (var o of others) {
+        log.write(`     ${o}`);
+    }
+    log.write('\n');
+};
+console.error = function (x, ...others) {
+    cerr(x, others);
+    err.write(`${new Date().toISOString()} ERR: ${x}`);
+    for (var o of others) {
+        err.write(`     ${o}`);
+    }
+    err.write('\n');
+};
 
 function runCmd(cmd, args) {
     console.log('Running command: ' + cmd + ' ' + args.join(' ') + '\n');
@@ -56,7 +52,7 @@ function runCmd(cmd, args) {
     });
 }
 
-async function incrementVersion(message) {
+async function incrementVersion() {
     var rawdata = fs.readFileSync('package.json');
     var packJson = JSON.parse(rawdata);
 
@@ -79,10 +75,9 @@ async function incrementVersion(message) {
         .filter((l) => l != '');
 
     if (changes.every((l) => l.charAt(0) != ' ')) {
-        var msgLines = message == undefined ? [] : [message];
-        msgLines.push(`version bump to ${packJson.version}`);
+        var msg = `version bump to ${packJson.version}`;
 
-        await runCmd('git', ['commit', '-m', msgLines.join('\n')]);
+        await runCmd('git', ['commit', '-m', msg]);
         console.log('[Publish] committed');
         await runCmd('git', ['push']);
         console.log('[Publish] pushed');
@@ -91,13 +86,4 @@ async function incrementVersion(message) {
     }
 }
 
-async function main() {
-    var message = undefined;
-    for (var i = 0; i < argc; i++) {
-        if ((argv[i] == '-m' || argv[i] == '--message') && argc > i + 1) message = argv[++i].replace('\\n', '\n');
-    }
-
-    await incrementVersion(message ?? `Version bump`);
-}
-
-main();
+incrementVersion();

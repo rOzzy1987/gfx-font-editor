@@ -1,6 +1,6 @@
 {
   "name": "arduino-font-editor",
-  "version": "0.9.2",
+  "version": "0.9.4",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,8 +8,7 @@
     "vbump": "node vbump",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
-    "build-only": "run-s vbump build-only-only",
-    "build-only-only": "vite build",
+    "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/"

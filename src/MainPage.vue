@@ -13,7 +13,7 @@
     <footer class="footer">
         <p class="has-text-centered">
             <b>Adafruit GFX font editor</b> by <a href="https://github.com/rOzzy1987" target="_blank">@rOzzy1987</a>
-            <br>2024
+            <br>v{{ app!.config.globalProperties.version }} 2024
         </p>
         <p class="has-text-centered">
             Source code available at <a href="https://github.com/rOzzy1987/gfx-font-editor" target="_blank">GitHub</a>
@@ -44,7 +44,7 @@ export default {
 
         return {
             font: undefined as Font | undefined,
-            app
+            app,
         };
     },
     methods: {
