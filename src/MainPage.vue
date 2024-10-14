@@ -39,7 +39,7 @@ export default {
     data() {
         const zoom = Number(localStorage.getItem("zoom"));
         const app = getCurrentInstance()?.appContext.app;
-        app!.config.globalProperties.zoom = Number.isNaN(zoom) ? 15 : zoom;
+        app!.config.globalProperties.zoom = (Number.isNaN(zoom) || zoom == 0) ? 15 : zoom;
         app!.config.globalProperties.pen = new Pen();
         app!.config.globalProperties.tool = Tool.PEN;
 
