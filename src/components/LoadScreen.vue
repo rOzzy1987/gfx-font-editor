@@ -215,7 +215,7 @@ export default {
                 const font = parser.loadCpp(this.src);
                 if (font == undefined)
                     throw "Font loading failed!";
-                this.fontProp = font;
+                this.fontProp = new Font(font);
             } catch (error) {
                 NotificationBus.add({ message: '' + error, type: 'err' });
             }

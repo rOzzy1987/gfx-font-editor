@@ -27,48 +27,51 @@
                     </div>
                 </div>
             </div>
-            <div>
-                <div class="columns">
-                    <div class="column">
-                        <div class="buttons">
-                            <button class="button is-success" @click="$emit('save')">
-                                <span class="icon">
-                                    <i class="fas fa-save"></i>
-                                </span>
-                                <span>Save</span>
-                            </button>
-                            <button class="button is-info" @click="$emit('export')">
-                                <span class="icon">
-                                    <i class="fas fa-download"></i>
-                                </span>
-                                <span>Export</span>
-                            </button>
-                            <button class="button is-danger" @click="$emit('reset')">
-                                <span class="icon">
-                                    <i class="fas fa-rotate"></i>
-                                </span>
-                                <span>Reset</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="column has-text-right">
-                        <button class="button is-success" @click="$emit('add')">
+            <div class="columns">
+                <div class="column">
+                    <div class="buttons">
+                        <button class="button is-success" @click="$emit('save')">
                             <span class="icon">
-                                <i class="fas fa-plus-square"></i>
+                                <i class="fas fa-save"></i>
                             </span>
-                            <span>Add glyph</span>
+                            <span>Save</span>
+                        </button>
+                        <button class="button is-info" @click="$emit('export')">
+                            <span class="icon">
+                                <i class="fas fa-download"></i>
+                            </span>
+                            <span>Export</span>
+                        </button>
+                        <button class="button is-danger" @click="$emit('reset')">
+                            <span class="icon">
+                                <i class="fas fa-rotate"></i>
+                            </span>
+                            <span>Reset</span>
                         </button>
                     </div>
                 </div>
+                <div class="column has-text-right">
+                    <button class="button is-success" @click="$emit('add')">
+                        <span class="icon">
+                            <i class="fas fa-plus-square"></i>
+                        </span>
+                        <span>Add glyph</span>
+                    </button>
+                </div>
+            </div>
+            <div class="control">
+                <GlyphEditorLinks :font="font" />
             </div>
         </div>
     </div>
+
 </template>
 
 <script lang="ts">
 import { Font } from '@/bll/FontModel';
 import NumericEditor from '@/components/NumericEditor.vue';
 import FontRenderer from '@/components/FontRenderer.vue';
+import GlyphEditorLinks from '@/components/GlyphEditorLinks.vue';
 
 export default {
     data() {
@@ -90,6 +93,6 @@ export default {
         }
     },
     emits: ['update:font', 'add', 'export', 'reset', 'save'],
-    components: { NumericEditor, FontRenderer }
+    components: { NumericEditor, FontRenderer, GlyphEditorLinks }
 };
 </script>

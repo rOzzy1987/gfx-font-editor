@@ -37,8 +37,9 @@ import { getCurrentInstance } from 'vue';
 
 export default {
     data() {
+        const zoom = Number(localStorage.getItem("zoom"));
         const app = getCurrentInstance()?.appContext.app;
-        app!.config.globalProperties.zoom = 15;
+        app!.config.globalProperties.zoom = Number.isNaN(zoom) ? 15 : zoom;
         app!.config.globalProperties.pen = new Pen();
         app!.config.globalProperties.tool = Tool.PEN;
 
@@ -60,18 +61,27 @@ export default {
                 result.char = src.char;
             }
             result.char = this.getNewChar(result.char);
+            if (this.font?.glyphs.find(g => g.char == result.char) != undefined) {
+                if (confirm(`Character '${result.char}' already has a glyph! Jump there?`))
+                    window.location.hash = "#glyph" + result.char.charCodeAt(0);
+                return;
+            }
             if (result.char.length == 1) {
                 result.charCode = result.char.charCodeAt(0);
-                this.font!.glyphs = [result].concat(this.font!.glyphs);
+
+                this.font!.glyphs.push(result);
+                this.font?.glyphs.sort((a, b) => a.charCode - b.charCode);
+
+                setTimeout(() => window.location.hash = '#glyph' + result.charCode);
             }
         },
         getNewChar(val: string = '') {
-            const c = prompt('Please specify the character or hex code', val);
+            const c = prompt('Please specify the character or hex code (0x...)', val);
             if (c == null) return '';
             if (c.length == 1) {
                 return c;
             } else if (c.length >= 2 && c.length % 2 == 0) {
-                return String.fromCharCode(Number.parseInt(c, 16));
+                return String.fromCharCode(Number.parseInt(c.toUpperCase().startsWith('0x') ? c.substring(2) : c, 16));
             }
             return '';
         },
@@ -115,7 +125,7 @@ export default {
             localStorage.setItem("fonts", JSON.stringify(fonts));
 
             NotificationBus.add({ message: 'Font saved: ' + font.name, type: 'info' });
-        }
+        },
     },
     components: { GlyphEditor, FontEditor, LoadScreen, NotificationDisplay, SupportMe, PixelToolbox }
 };

@@ -1,9 +1,9 @@
 <template>
-    <div class="pixel-toolbox" :class="{ 'fixed': isFixed }">
-        <button class="button is-light" title="Pin toolbar" :class="{ 'is-active': isFixed }"
+    <div class="pixel-toolbox" :class="{ 'fixed': isFixed, 'animate': animate }">
+        <button class="button is-light pin-toolbar" title="Pin/unpin toolbar" :class="{ 'is-active': isFixed }"
             @click="isFixed = !isFixed">
             <span class="icon">
-                <i class="fas" :class="{ 'fa-chevron-left': !isFixed, 'fa-chevron-right': isFixed }"></i>
+                <i class="fas fa-thumbtack"></i>
             </span>
         </button>
         <div class="divider"></div>
@@ -102,13 +102,14 @@ import { Pen, PENS, Tool } from '../bll/Bitmap';
 
 export default {
     data() {
-
+        const fixed = localStorage.getItem("pixelToolbarFixed") == 'true'
 
         return {
             penSize: 0,
-            zooms: [5, 7, 10, 15, 20],
+            zooms: [5, 7, 10, 15, 20, 30],
             ToolEnum: Tool,
-            isFixed: false,
+            isFixed: fixed,
+            animate: !fixed
         }
     },
     props: {
@@ -143,6 +144,10 @@ export default {
             get(): number { return this.zoom; },
             set(v: number) { this.$emit("update:zoom", v); }
         }
+    },
+    watch: {
+        zoom(v: number) { localStorage.setItem("zoom", v.toFixed(0)); },
+        isFixed(v: boolean) { localStorage.setItem("pixelToolbarFixed", v.toString()); }
     }
 }
 
@@ -193,6 +198,9 @@ export default {
     max-height: calc(100vh - 100px);
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.pixel-toolbox.animate {
     animation: 1s pxtool linear;
 }
 
@@ -202,6 +210,15 @@ export default {
 
 .pixel-toolbox:hover {
     right: 0;
+}
+
+.pin-toolbar .icon {
+    transform: rotate(60deg);
+    transition: transform .15s ease-in-out;
+}
+
+.pin-toolbar.is-active .icon {
+    transform: rotate(0deg);
 }
 
 .divider {

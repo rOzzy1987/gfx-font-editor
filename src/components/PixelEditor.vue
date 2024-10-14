@@ -1,10 +1,17 @@
 <template>
     <canvas ref="cnv" :width="width * zoom" :height="height * zoom" @mouseenter="mouseEnter" @mouseleave="mouseLeave"
         @mousedown="mouseDown" @mousemove="mouseMove" @mouseup="mouseUp"></canvas>
+    <TipBubble v-if="showTip1">Try drawing a line with <u>Shift</u> + <u>Click</u>!</TipBubble>
+    <TipBubble v-if="showTip2">You can force a <i>pen</i> or <i>fill</i> color with <u>Ctrl</u> (white) and
+        <u>Alt</u>(Black!)
+    </TipBubble>
 </template>
 
 <script lang="ts">
 import { type Point, BitmapEditor, BitmapRenderer, Pen, Tool, type Bitmap, type PenColor } from '../bll/Bitmap';
+import TipBubble from '@/components/TipBubble.vue';
+
+let __paintCounter = Number(localStorage.getItem('paintCounter') ?? 0);
 
 export default {
     data() {
@@ -13,7 +20,9 @@ export default {
             cursorPos: p,
             penValue: 0 as PenColor,
             isMouseDown: false,
-            lastPoint: { x: 0, y: 0 } as Point
+            lastPoint: { x: 0, y: 0 } as Point,
+            showTip1: false,
+            showTip2: false,
         }
     },
     mounted() {
@@ -41,6 +50,7 @@ export default {
                 this.render()
         },
         mouseDown(ev: MouseEvent) {
+            this.tips();
             this.getCanvasCoords(ev);
             this.penValue = ev.ctrlKey ? 0
                 : ev.altKey ? 1
@@ -64,6 +74,20 @@ export default {
         },
         getCanvasCoords(ev: MouseEvent) {
             this.cursorPos = { x: ev.offsetX, y: ev.offsetY };
+        },
+
+        tips() {
+            localStorage.setItem('paintCounter', (++__paintCounter).toFixed(0));
+            if (__paintCounter == 5) {
+                this.showTip1 = true;
+                setTimeout(() => this.showTip1 = false, 5000);
+            }
+            if (__paintCounter == 15) {
+                this.showTip2 = true;
+                setTimeout(() => this.showTip2 = false, 8000);
+            }
+
+            if (__paintCounter == 500) __paintCounter = 0;
         },
 
 
@@ -167,7 +191,8 @@ export default {
         width() { this.resize(); this.render(); },
         height() { this.resize(); this.render(); },
         zoom() { this.render(); },
-    }
+    },
+    components: { TipBubble }
 }
 </script>
 <style scoped>

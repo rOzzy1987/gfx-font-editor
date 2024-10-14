@@ -32,19 +32,17 @@
                 </span>
             </button>
         </p>
-        <div class="tip" v-if="showTip">
-            <div class="bubble">
-                <div class="icon"><i class="fas fa-info-circle"></i></div>
-                Try <u>Ctrl</u>+<u>Mouse scroll</u> while hovering over this area to adjust values quickly!
-            </div>
-            <div class="tail"></div>
-        </div>
+        <TipBubble v-if="showTip">
+            Try <u>Ctrl</u>+<u>Mouse scroll</u> while hovering over this area to adjust values quickly!
+        </TipBubble>
     </div>
 </template>
 
 <script lang="ts">
+import TipBubble from './TipBubble.vue';
 
-let __focusCounter = JSON.parse(localStorage.getItem('focusCounter') ?? '0');
+
+let __numFieldCounter = JSON.parse(localStorage.getItem('numFieldCounter') ?? '0');
 
 export default {
     data() {
@@ -75,15 +73,15 @@ export default {
             return false;
         },
         focus() {
-            __focusCounter++;
-            if (__focusCounter == 5) {
+            __numFieldCounter++;
+            if (__numFieldCounter == 5) {
                 this.showTip = true;
                 setTimeout(() => this.showTip = false, 5000);
             }
-            if (__focusCounter == 500) {
-                __focusCounter = 0;
+            if (__numFieldCounter == 500) {
+                __numFieldCounter = 0;
             }
-            localStorage.setItem('focusCounter', JSON.stringify(__focusCounter));
+            localStorage.setItem('numFieldCounter', JSON.stringify(__numFieldCounter));
         }
     },
     computed: {
@@ -112,6 +110,9 @@ export default {
                     return css + '';
             }
         }
+    },
+    components: {
+        TipBubble
     }
 };
 </script>
@@ -119,42 +120,6 @@ export default {
 <style scoped>
 .numfield {
     position: relative;
-}
-
-.tip {
-    display: inline-block;
-    position: absolute;
-    bottom: calc(100% + 12px);
-    left: 3rem;
-    width: 200px;
-    color: #000;
-}
-
-.tip .bubble,
-.tip .tail {
-    background-color: hsl(var(--bulma-info-h), var(--bulma-info-s), var(--bulma-info-l));
-}
-
-.tip .bubble {
-    border-radius: 10px;
-    padding: 8px;
-}
-
-.tip .tail {
-    height: 15px;
-    width: 15px;
-    position: absolute;
-    bottom: -7px;
-    left: 40px;
-    transform: rotate(45deg);
-}
-
-.tip u {
-    font-family: monospace;
-    text-decoration: none;
-    background-color: rgba(0, 0, 0, .15);
-    border-radius: 4px;
-    padding: 2px;
 }
 
 input {

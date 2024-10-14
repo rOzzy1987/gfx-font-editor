@@ -2,6 +2,7 @@
     <div class="glyph-editor message is-success" v-if="modelValueField !== undefined">
         <div class="message-header">
             <p>
+                <a :name="'glyph' + modelValueField.charCode"></a>
                 {{ modelValueField.char }} - ({{ modelValueField.charCode }} - 0x{{
                     modelValueField.charCode.toString(16)
                 }})
@@ -264,7 +265,6 @@ export default {
 .pixel-editor {
     background: #ccc;
     position: relative;
-    overflow: hidden;
 }
 
 .line-marker {
