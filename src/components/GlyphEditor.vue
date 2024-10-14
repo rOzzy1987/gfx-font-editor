@@ -1,5 +1,5 @@
 <template>
-    <div class="glyph-editor message is-success" v-if="modelValueField !== undefined" @mouseup="mouseUp">
+    <div class="glyph-editor message is-success" v-if="modelValueField !== undefined">
         <div class="message-header">
             <p>
                 {{ modelValueField.char }} - ({{ modelValueField.charCode }} - 0x{{
@@ -12,10 +12,9 @@
                 <div class="column">
                     <div class="pixel-editor" :style="pixelEditorStyle">
                         <div class="pixels" :style="pixelsStyle">
-                            <div v-for="(r, rk) in modelValueField.bitmap" v-bind:key="rk" class="pixel-row">
-                                <div v-for="(c, ck) of r" v-bind:key="ck" class="pixel" :class="{ active: c > 0 }"
-                                    @mousedown="mouseDn(ck, rk)" @mousemove="mouseMv(ck, rk)"></div>
-                            </div>
+                            <PixelEditor ref="pxed" :width="modelValue.cols" :height="modelValue.rows"
+                                :pen="app.config.globalProperties.pen" :zoom="app.config.globalProperties.zoom"
+                                v-model:bitmap="bitmapProp" :tool="app.config.globalProperties.tool" />
                         </div>
                         <div class="line-marker" :style="lineStyle"></div>
                         <div class="char-marker" :style="charStyle"></div>
@@ -34,10 +33,10 @@
                                 class="fe" />
                             <NumericEditor v-model="modelValueField.rows" :color="1" :text="'hght'"
                                 title="Bitmap height" class="fe" />
-                            <NumericEditor v-model="modelValueField.base" :color="2" :text="'base'"
-                                title="Baseline offset" :min="-250" class="fe" />
-                            <NumericEditor v-model="modelValueField.xOffset" :color="3" :text="'offs'" title="X offset"
+                            <NumericEditor v-model="modelValueField.xOffset" :color="2" :text="'xOff'" title="X offset"
                                 class="fe" />
+                            <NumericEditor v-model="modelValueField.base" :color="2" :text="'yOff'"
+                                title="Baseline offset" :min="-250" class="fe" />
                             <NumericEditor v-model="modelValueField.xAdvance" :color="4" :text="'xAdv'"
                                 title="X advance" class="fe" />
                         </div>
@@ -123,79 +122,41 @@
 <script lang="ts">
 import { Glyph } from '@/bll/FontModel';
 import NumericEditor from '@/components/NumericEditor.vue';
+import PixelEditor from './PixelEditor.vue';
+import { type Bitmap } from '../bll/Bitmap';
+import { getCurrentInstance } from 'vue';
 
 export default {
     data(props) {
+        const app = getCurrentInstance()?.appContext.app!;
         return {
             modelValueField: props.modelValue,
-            isMouseDn: false,
-            pen: 0
+            app,
         };
     },
     props: {
         modelValue: { type: Glyph, required: true },
-        fontHeight: { type: Number, required: true }
+        fontHeight: { type: Number, required: true },
     },
     methods: {
-        mouseDn(x: number, y: number) {
-            this.isMouseDn = true;
-            this.pen = (this.modelValueField?.bitmap[y][x] ?? 0) ? 0 : 1;
-            this.paint(x, y);
-        },
-        mouseMv(x: number, y: number) {
-            if (this.isMouseDn) this.paint(x, y);
-        },
-        mouseUp() {
-            this.isMouseDn = false;
-        },
-        paint(x: number, y: number) {
-            if (this.modelValueField?.bitmap == undefined) return;
-            this.modelValueField.bitmap[y][x] = this.pen;
-        },
         moveL() {
-            this.transformCols(r => {
-                const p = r.splice(0, 1);
-                return r.concat(p);
-            });
+            this.editorObj.shiftH(-1);
         },
         moveR() {
-            this.transformCols(r => {
-                const p = r.splice(0, r.length - 1);
-                return r.concat(p);
-            });
+            this.editorObj.shiftH(1);
         },
         moveU() {
-            this.transformRows(c => {
-                const p = c.splice(0, 1);
-                return c.concat(p);
-            })
+            this.editorObj.shiftV(-1);
         },
         moveD() {
-            this.transformRows(c => {
-                const p = c.splice(0, c.length - 1);
-                return c.concat(p);
-            })
+            this.editorObj.shiftV(1);
         },
         flipH() {
-            this.transformCols(r => {
-                return r.slice().reverse();
-            });
+            this.editorObj.flipH();
         },
         flipV() {
-            this.transformRows(r => {
-                return r.slice().reverse();
-            });
+            this.editorObj.flipV();
         },
-        transformCols(fn: (r: number[]) => number[]) {
-            if (this.modelValueField.bitmap.length == 0 || this.modelValueField.bitmap[0].length == 0) return;
-            for (let i in this.modelValueField.bitmap) {
-                this.modelValueField.bitmap[i] = fn(this.modelValueField.bitmap[i]);
-            }
-        },
-        transformRows(fn: (c: number[][]) => number[][]) {
-            if (this.modelValueField.bitmap.length == 0 || this.modelValueField.bitmap[0].length == 0) return;
-            this.modelValueField.bitmap = fn(this.modelValueField.bitmap);
-        }
     },
     computed: {
         modelValueProp: {
@@ -207,6 +168,15 @@ export default {
                 this.$emit('update:modelValue', v);
             }
         },
+        bitmapProp: {
+            get(): Bitmap { return this.modelValueField.bitmap; },
+            set(v: Bitmap) {
+                this.modelValueField.bitmap = v;
+                this.$emit('update:modelValue', this.modelValueField);
+            }
+        },
+        editorObj() { return (this.$refs.pxed) as any; },
+
         sizing() {
             const lineTop = 0;
             const lineBottom = this.fontHeight;
@@ -222,6 +192,7 @@ export default {
             const maxX = Math.max(charRight, fieldRight);
             const offsetY = -Math.min(lineTop, charTop);
             const offsetX = -Math.min(fieldLeft, charLeft);
+            const zoom = this.app.config.globalProperties.zoom;
 
             return {
                 lineTop,
@@ -237,65 +208,47 @@ export default {
                 minY,
                 maxY,
                 offsetX,
-                offsetY
+                offsetY,
+                zoom
             };
         },
         pixelEditorStyle() {
             const s = this.sizing;
             return {
-                height: (s.maxY - s.minY + 4) * 12 + 'px',
-                width: (s.maxX - s.minX + 4) * 12 + 'px'
+                height: (s.maxY - s.minY + 4) * s.zoom + 'px',
+                width: (s.maxX - s.minX + 4) * s.zoom + 'px'
             };
         },
         pixelsStyle() {
             const s = this.sizing;
 
             return {
-                top: (s.charTop + 2 + s.offsetY) * 12 + 'px',
-                left: (s.charLeft + 2 + s.offsetX) * 12 + 'px'
+                top: (s.charTop + 2 + s.offsetY) * s.zoom + 'px',
+                left: (s.charLeft + 2 + s.offsetX) * s.zoom + 'px'
             };
         },
         lineStyle() {
             const s = this.sizing;
             return {
-                top: (s.lineTop + 2 + s.offsetY) * 12 - 1 + 'px',
-                height: (s.lineBottom - s.lineTop) * 12 + 2 + 'px'
+                top: (s.lineTop + 2 + s.offsetY) * s.zoom - 1 + 'px',
+                height: (s.lineBottom - s.lineTop) * s.zoom + 2 + 'px'
             };
         },
         charStyle() {
             const s = this.sizing;
             return {
-                left: (s.fieldLeft + 2 + s.offsetX) * 12 - 1 + 'px',
-                width: (s.fieldRight - s.fieldLeft) * 12 + 2 + 'px'
+                left: (s.fieldLeft + 2 + s.offsetX) * s.zoom - 1 + 'px',
+                width: (s.fieldRight - s.fieldLeft) * s.zoom + 2 + 'px'
             };
-        }
+        },
     },
     watch: {
         modelValue(v) {
             this.modelValueField = v;
         },
-        'modelValueField.rows'(v) {
-            v = v < 0 ? 0 : v;
-            while (this.modelValueField.bitmap.length < v) {
-                this.modelValueField.bitmap.push(Array(this.modelValueField.cols).map(() => 0));
-            }
-            while (this.modelValueField.bitmap.length > v) {
-                this.modelValueField.bitmap.pop();
-            }
-        },
-        'modelValueField.cols'(v) {
-            v = v < 0 ? 0 : v;
-            if (this.modelValueField.bitmap.length == 0) return;
-            for (let r in this.modelValueField.bitmap) {
-                while (this.modelValueField.bitmap[r].length < v) this.modelValueField.bitmap[r].push(0);
-            }
-            for (let r in this.modelValueField.bitmap) {
-                while (this.modelValueField.bitmap[r].length > v) this.modelValueField.bitmap[r].pop();
-            }
-        }
     },
     emits: ['update:modelValue', 'clone', 'delete'],
-    components: { NumericEditor }
+    components: { NumericEditor, PixelEditor }
 };
 </script>
 <style scoped>
