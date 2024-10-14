@@ -4,8 +4,10 @@
         <FontEditor v-model:font="font" @add="addGlyph" @export="exportFont" @reset="resetFont" @save="saveToStorage" />
     </div>
     <div class="block glyphs" v-if="font !== undefined">
-        <GlyphEditor v-for="g in font.glyphs" v-bind:key="`g${g.char}`" :model-value="g" :font-height="font.height"
-            @clone="addGlyph" @delete="deleteGlyph" />
+        <GlyphEditor v-for="(g, gi) in font.glyphs" v-bind:key="`g${g.char}`" v-model="font.glyphs[gi]"
+            :font-height="font.height" @clone="addGlyph" @delete="deleteGlyph" />
+        <pixel-toolbox :pen="app!.config.globalProperties.pen" v-model:tool="app!.config.globalProperties.tool"
+            v-model:zoom="app!.config.globalProperties.zoom" />
     </div>
     <NotificationDisplay />
     <footer class="footer">
@@ -29,11 +31,20 @@ import LoadScreen from './components/LoadScreen.vue';
 import GfxFontExporter from './bll/GfxFontExporter';
 import SupportMe from './components/SupportMe.vue';
 import NotificationDisplay from './components/NotificationDisplay.vue';
+import PixelToolbox from './components/PixelToolbox.vue';
+import { Pen, Tool } from './bll/Bitmap';
+import { getCurrentInstance } from 'vue';
 
 export default {
     data() {
+        const app = getCurrentInstance()?.appContext.app;
+        app!.config.globalProperties.zoom = 15;
+        app!.config.globalProperties.pen = new Pen();
+        app!.config.globalProperties.tool = Tool.PEN;
+
         return {
             font: undefined as Font | undefined,
+            app
         };
     },
     methods: {
@@ -106,7 +117,7 @@ export default {
             NotificationBus.add({ message: 'Font saved: ' + font.name, type: 'info' });
         }
     },
-    components: { GlyphEditor, FontEditor, LoadScreen, NotificationDisplay, SupportMe }
+    components: { GlyphEditor, FontEditor, LoadScreen, NotificationDisplay, SupportMe, PixelToolbox }
 };
 </script>
 <style>

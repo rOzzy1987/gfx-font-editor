@@ -1,5 +1,7 @@
+import { type Bitmap } from '@/bll/Bitmap';
+
 export interface IGlyph {
-    bitmap: number[][];
+    bitmap: Bitmap;
     char: string;
     charCode: number;
     rows: number;
@@ -24,7 +26,7 @@ export interface ISavedFont {
 }
 
 export class Glyph {
-    bitmap: number[][] = [];
+    bitmap: Bitmap = [];
     char: string = ' ';
     charCode: number = 32;
     rows: number = 0;

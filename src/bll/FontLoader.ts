@@ -1,3 +1,4 @@
+import type { Bitmap } from '@/bll/Bitmap';
 import { isCppVariableReference, type ICppVariableDefinition } from './CppModel';
 import { CppParser } from './CppParser';
 import { type IFont, type IGlyph } from './FontModel';
@@ -50,7 +51,7 @@ export class FontLoader {
         if (!Array.isArray(arr)) throw 'Glyph parse error: ' + arr;
 
         const result = {
-            bitmap: [] as number[][],
+            bitmap: [] as Bitmap,
             char: String.fromCharCode(Number(i)),
             charCode: Number(i),
             cols: Number(arr[1]),
@@ -60,12 +61,12 @@ export class FontLoader {
             base: Number(arr[5])
         };
 
-        const bmp = [] as number[][];
+        const bmp = [] as Bitmap;
         const start = Number(arr[0]);
         for (let row = 0, bit = 0; row < result.rows; row++) {
             bmp.push([]);
             for (let col = 0; col < result.cols; col++, bit++) {
-                bmp[row].push((Number(src[start + Math.floor(bit / 8)]) >> (7 - (bit % 8))) & 1);
+                bmp[row].push(((Number(src[start + Math.floor(bit / 8)]) >> (7 - (bit % 8))) & 1) > 0 ? 0 : 1);
             }
         }
 
