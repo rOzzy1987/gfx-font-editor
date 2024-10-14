@@ -1,20 +1,30 @@
 <template>
-    <div class="pixel-toolbox">
-        <button class="button" :class="{ 'is-active': pen.color == 1 }" @click="penProp.color = 1">
+    <div class="pixel-toolbox" :class="{ 'fixed': isFixed }">
+        <button class="button is-light" title="Pin toolbar" :class="{ 'is-active': isFixed }"
+            @click="isFixed = !isFixed">
+            <span class="icon">
+                <i class="fas" :class="{ 'fa-chevron-left': !isFixed, 'fa-chevron-right': isFixed }"></i>
+            </span>
+        </button>
+        <div class="divider"></div>
+        <button class="button is-danger is-light" :class="{ 'is-active': pen.color == 1 }" @click="penProp.color = 1"
+            title="Color: black">
             <span class="icon">
                 <svg style="height: 16px; width: 16px;">
                     <path d="M0 0 L16 0 L16 16 L0 16 L0 0" style="fill: #000; stroke: #000" />
                 </svg>
             </span>
         </button>
-        <button class="button" :class="{ 'is-active': pen.color == 0 }" @click="penProp.color = 0">
+        <button class="button is-danger is-light" :class="{ 'is-active': pen.color == 0 }" @click="penProp.color = 0"
+            title="Color: white">
             <span class="icon">
                 <svg style="height: 16px; width: 16px;">
                     <path d="M0 0 L16 0 L16 16 L0 16 L0 0" style="fill: none; stroke: #000" />
                 </svg>
             </span>
         </button>
-        <button class="button" :class="{ 'is-active': pen.color == -1 }" @click="penProp.color = -1">
+        <button class="button is-danger is-light" :class="{ 'is-active': pen.color == -1 }" @click="penProp.color = -1"
+            title="Color: invert">
             <span class="icon">
                 <svg style="height: 16px; width: 16px;">
                     <path d="M0 0 L16 0 L16 16 L0 16 L0 0" style="fill: none; stroke: #000" />
@@ -23,54 +33,62 @@
             </span>
         </button>
         <div class="divider"></div>
-        <button class="button" :class="{ 'is-active': penSize == 0 }" @click="setPenSize(0)">
+        <button class="button is-warning is-light" :class="{ 'is-active': penSize == 0 }" @click="setPenSize(0)"
+            title="Pen: Small square">
             <span class="icon is-small">
                 <i class="fas fa-square"></i>
             </span>
         </button>
-        <button class="button" :class="{ 'is-active': penSize == 1 }" @click="setPenSize(1)">
+        <button class="button is-warning is-light" :class="{ 'is-active': penSize == 1 }" @click="setPenSize(1)"
+            title="Pen: Medium square">
             <span class="icon">
                 <i class="fas fa-square"></i>
             </span>
         </button>
-        <button class="button" :class="{ 'is-active': penSize == 2 }" @click="setPenSize(2)">
+        <button class="button is-warning is-light" :class="{ 'is-active': penSize == 2 }" @click="setPenSize(2)"
+            title="Pen: Large square">
             <span class="icon is-large">
                 <i class="fas fa-square"></i>
             </span>
         </button>
-        <button class="button" :class="{ 'is-active': penSize == 3 }" @click="setPenSize(3)">
+        <button class="button is-warning is-light" :class="{ 'is-active': penSize == 3 }" @click="setPenSize(3)"
+            title="Pen: Small circle">
             <span class="icon is-small">
                 <i class="fas fa-circle"></i>
             </span>
         </button>
-        <button class="button" :class="{ 'is-active': penSize == 4 }" @click="setPenSize(4)">
+        <button class="button is-warning is-light" :class="{ 'is-active': penSize == 4 }" @click="setPenSize(4)"
+            title="Pen: Medium circle">
             <span class="icon">
                 <i class="fas fa-circle"></i>
             </span>
         </button>
-        <button class="button" :class="{ 'is-active': penSize == 5 }" @click="setPenSize(5)">
+        <button class="button is-warning is-light" :class="{ 'is-active': penSize == 5 }" @click="setPenSize(5)"
+            title="Pen: Large circle">
             <span class="icon is-large">
                 <i class="fas fa-circle"></i>
             </span>
         </button>
         <div class="divider"></div>
-        <button class="button" :class="{ 'is-active': toolProp == ToolEnum.FILL }" @click="toolProp = ToolEnum.FILL">
+        <button class="button is-success is-light" :class="{ 'is-active': toolProp == ToolEnum.FILL }"
+            title="Tool: Flood fill" @click="toolProp = ToolEnum.FILL">
             <span class="icon">
                 <i class="fas fa-fill-drip"></i>
             </span>
         </button>
-        <button class="button" :class="{ 'is-active': toolProp == ToolEnum.PEN }" @click="toolProp = ToolEnum.PEN">
+        <button class="button is-success is-light" :class="{ 'is-active': toolProp == ToolEnum.PEN }" title="Tool: Pen"
+            @click="toolProp = ToolEnum.PEN">
             <span class="icon">
                 <i class="fas fa-pen"></i>
             </span>
         </button>
         <div class="divider"></div>
-        <button class="button" @click="zoomIn(1)">
+        <button class="button is-info is-light" @click="zoomIn(1)" title="Zoom in">
             <span class="icon">
                 <i class="fas fa-search-plus"></i>
             </span>
         </button>
-        <button class="button" @click="zoomIn(-1)">
+        <button class="button is-info is-light" @click="zoomIn(-1)" title="Zoom out">
             <span class="icon">
                 <i class="fas fa-search-minus"></i>
             </span>
@@ -89,7 +107,8 @@ export default {
         return {
             penSize: 0,
             zooms: [5, 7, 10, 15, 20],
-            ToolEnum: Tool
+            ToolEnum: Tool,
+            isFixed: false,
         }
     },
     props: {
@@ -175,6 +194,10 @@ export default {
     overflow-y: auto;
     overflow-x: hidden;
     animation: 1s pxtool linear;
+}
+
+.pixel-toolbox.fixed {
+    right: 0;
 }
 
 .pixel-toolbox:hover {
