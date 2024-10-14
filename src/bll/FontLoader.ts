@@ -66,7 +66,7 @@ export class FontLoader {
         for (let row = 0, bit = 0; row < result.rows; row++) {
             bmp.push([]);
             for (let col = 0; col < result.cols; col++, bit++) {
-                bmp[row].push(((Number(src[start + Math.floor(bit / 8)]) >> (7 - (bit % 8))) & 1) > 0 ? 0 : 1);
+                bmp[row].push(((Number(src[start + Math.floor(bit / 8)]) >> (7 - (bit % 8))) & 1) > 0 ? 1 : 0);
             }
         }
 
