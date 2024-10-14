@@ -212,9 +212,10 @@ export default {
         parseFont() {
             var parser = new FontLoader();
             try {
-                this.fontProp = parser.loadCpp(this.src);
-                if (this.fontProp == undefined)
+                const font = parser.loadCpp(this.src);
+                if (font == undefined)
                     throw "Font loading failed!";
+                this.fontProp = font;
             } catch (error) {
                 NotificationBus.add({ message: '' + error, type: 'err' });
             }
